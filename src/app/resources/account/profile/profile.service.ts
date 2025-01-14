@@ -18,7 +18,7 @@ export class ProfileService {
 
     constructor(private readonly fileService: FileService) { };
 
-    async update(body: UpdateProfileDto, userId: number): Promise<{ data: { access_token: string }, message: string }> {
+    async update(body: UpdateProfileDto, userId: number): Promise<{ data: { access_token: string, user: any }, message: string }> {
         //=============================================
         let currentUser: User;
         try {
@@ -102,10 +102,16 @@ export class ProfileService {
             }
         }
 
+        const user = await User.findOne({
+            where: {id: updateUser.id},
+            attributes: ['id', 'name', 'email','phone', 'avatar']
+        });
+
         const token: string = this.generateToken(updateUser.id, updateUser.name, updateUser.email, updateUser.avatar, updateUser.phone, updateUser.role.name);
         return {
             data: {
                 access_token: token,
+                user: user
             },
             message: 'Your profile has been updated successfully.'
         }

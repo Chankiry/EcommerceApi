@@ -20,7 +20,7 @@ export class ProfileController {
     ) { };
 
     @Put('')
-    async update(@Body() body: UpdateProfileDto, @UserDecorator() user: User): Promise<{ data: { access_token: string }, message: string }> {
+    async update(@Body() body: UpdateProfileDto, @UserDecorator() user: User): Promise<{ data: { access_token: string, user: any }, message: string }> {
         return await this.profileService.update(body, user.id);
     }
 

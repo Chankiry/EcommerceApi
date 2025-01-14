@@ -124,6 +124,7 @@ export class AuthService {
             const user = await User.create(
                 {
                     name: body.name,
+                    avatar: 'static/ecommerce/user/avatar.png',
                     email: body.email,
                     phone: body.phone,
                     password: body.password,
