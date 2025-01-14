@@ -28,7 +28,3 @@ $ npm run migrate
 ```bash
 $ npm run seeder
 ```
-
-## License
-
-NestJS API with [KIRY](https://t.me/yim_klok).
