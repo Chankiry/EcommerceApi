@@ -20,6 +20,13 @@ export class OrderController {
         return await this._service.listing(user.id);
     }
 
+    @Get('products-cart')
+    async listingProductCart(
+        @UserDecorator() user: User
+    ): Promise<any> {
+        return await this._service.listingProductCart(user.id);
+    }
+
     @Post('add-to-cart/:id')
     async addToCard(
         @Param('id') product_id: number,
@@ -30,23 +37,33 @@ export class OrderController {
         return await this._service.addToCard(product_id,user.id, body);
     }
 
+    @Post('add-qyt-in-cart/:id')
+    async addQty(
+        @Param('id') id: number,
+        @Body('qty') qty: number,
+        @UserDecorator() user?: User
+    ) : Promise<any>
+    {
+        return await this._service.addQty(id,user.id, qty);
+    }
+
     @Delete('remove-form-cart/:id')
     async removeFromCart(
         @Param('id') id: number,
         @UserDecorator() user?: User
     ) : Promise<any>
     {
+        console.log(id)
         return await this._service.removeFromCart(id, user.id);
     }
 
     @Post('checkout')
     async update(
-        @Query('shipping_id') shipping_id: number,
-        @Query('payment_id') payment_id: number,
+        @Body() body: {shipping_id: number, payment_id: number },
         @UserDecorator() user?: User
     ) : Promise<any>
     {
-        return await this._service.checkout(user.id, shipping_id, payment_id);
+        return await this._service.checkout(user.id, body.shipping_id, body.payment_id);
     }
 
 }

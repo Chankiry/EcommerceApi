@@ -34,11 +34,65 @@ export class OrderService {
                 throw new BadRequestException("User doesn't exist!");
             }
 
-            const orders = await OrderDetail.findAll({
-                where: {user_id}
+            const checkout = await Checkout.findAll({
+                where: {user_id},
+                include: [
+                    {
+                        model: OrderDetail
+                    }
+                ]
+            })
+            
+            return checkout;
+
+        }
+        catch(err){
+            console.log(err.message);
+            throw new BadRequestException(err.message);
+        }
+    }
+
+    async listingProductCart( user_id: number ): Promise<any>{
+        try {
+            
+            const user = await User.findByPk(user_id);
+            
+            if(!user){
+                throw new BadRequestException("User doesn't exist!");
+            }
+
+            const cart = await Cart.findAll({
+                where: {user_id},
+                attributes: ['id', 'qty'],
+                include: [
+                    {
+                        model: Product,
+                        attributes: ['id', 'name', 'image', 'price', 'discount']
+                    },
+                    {
+                        model: ProductSize,
+                        attributes: ['id', 'name']
+                    },
+                    {
+                        model: ProductColor,
+                        attributes: ['id', 'name', 'color']
+                    },
+                ]
             });
 
-            return orders;
+            return cart.map(p =>{
+                return {
+                    id: p.id,
+                    qty: p.qty,
+                    name: p.product.name,
+                    price: p.product.price,
+                    discount: p.product.discount,
+                    image: p.product.image,
+                    size: p.size.name,
+                    color: p.color.name
+
+                }
+            });
 
         }
         catch(err){
@@ -104,6 +158,59 @@ export class OrderService {
             await transaction.commit();
 
             return newCart;
+        }
+        catch(err){
+            throw new BadRequestException(err.message);
+        }
+    }
+
+    async addQty( id: number, user_id: number, qty: number = 1): Promise<any> {
+        const sequelize = new Sequelize(sequelizeConfig);
+        let transaction: Transaction;
+        try {
+            // Start the transaction
+            transaction = await sequelize.transaction();
+
+            if(qty < 1){
+                await transaction.rollback();
+                throw new BadRequestException("Quantity must be more or equal to 1!");
+            }
+
+            const user = await User.findByPk(user_id);
+            
+            if(!user){
+                await transaction.rollback();
+                throw new BadRequestException("User doesn't exist!");
+            }
+
+            const checkCart = await Cart.findByPk(id);
+            
+            if(!checkCart){
+                await transaction.rollback();
+                throw new BadRequestException("This product doesn't exist in cart!");
+            }
+
+            const newCart = await Cart.update(
+                {
+                    qty,
+                },
+                {
+                    where: {id, user_id},
+                    transaction,
+                }
+            )
+
+            if (!newCart){
+                await transaction.rollback();
+                throw new BadRequestException('update quantity unsuccessfull!');
+            }
+
+            await transaction.commit();
+
+            return {
+                message: "update quantity successfull!"
+            }
+
         }
         catch(err){
             throw new BadRequestException(err.message);

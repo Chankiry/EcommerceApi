@@ -1,5 +1,5 @@
 // ================================================================>> Third Party Library
-import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { AfterCreate, BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
 
 // ================================================================>> Custom Library
 import User from '../user/user.model';
@@ -9,7 +9,7 @@ import ProductOrder from './order_detail.model';
 class Checkout extends Model<Checkout> {
 
     @Column({
-        allowNull: false,
+        allowNull: true,
         unique: true,
         type: DataType.INTEGER
     })
@@ -46,10 +46,11 @@ class Checkout extends Model<Checkout> {
     @HasMany(() => ProductOrder)
     products: ProductOrder[];
 
-    // Getter to format receipt_number as six digits
-    get formatted_receipt_number(): string {
-        this.receipt_number = this.id.toString();
-        return this.receipt_number.toString().padStart(6, '0');
+    // Hook to set receipt_number after creation
+    @AfterCreate
+    static setReceiptNumber(instance: Checkout) {
+        const formattedId = instance.id.toString().padStart(6, '0');
+        instance.update({ receipt_number: formattedId });
     }
 }
 
