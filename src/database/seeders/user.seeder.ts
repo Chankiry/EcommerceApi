@@ -1,7 +1,4 @@
-// ================================================================>> Third Party Library
-import * as bcrypt from 'bcryptjs';
 
-// ================================================================>> Costom Library
 import { UsersActiveEnum }  from "../../app/enums/user/active.enum";
 import { UsersRoleEnum }    from "../../app/enums/user/type.enum";
 import UsersRole            from "../../models/user/role.model";
@@ -19,10 +16,6 @@ export class UserSeeder {
             console.log('\x1b[32m\nSeed users_type inserted successfully.');
         } catch (error) {
             console.error('Error seeding orders:', error);
-        }
-        // Hash passwords before creating users
-        for (const userData of userSeeder.users) {
-            userData.password = await bcrypt.hash(userData.password, 10);
         }
         try {
             await User.bulkCreate(userSeeder.users);
